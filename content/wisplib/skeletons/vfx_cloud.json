@@ -1,0 +1,2056 @@
+{
+  "root": {
+    "name": "root",
+    "model": "",
+    "nodes": [
+      {
+        "name": "mote_001",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_002",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_003",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_004",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_005",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_006",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_007",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_008",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_009",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_010",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_011",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_012",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_013",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_014",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_015",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_016",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_017",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_018",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_019",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_020",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_021",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_022",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_023",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_024",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_025",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_026",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_027",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_028",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_029",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_030",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_031",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_032",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_033",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_034",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_035",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_036",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_037",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_038",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_039",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_040",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_041",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_042",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_043",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_044",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_045",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_046",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_047",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_048",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_049",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_050",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_051",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_052",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_053",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_054",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_055",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_056",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_057",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_058",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_059",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_060",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_061",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_062",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_063",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_064",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_065",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_066",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_067",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_068",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_069",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_070",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_071",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_072",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_073",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_074",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_075",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_076",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_077",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_078",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_079",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_080",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_081",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_082",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_083",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_084",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_085",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_086",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_087",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_088",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_089",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_090",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_091",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_092",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_093",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_094",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_095",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_096",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_097",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_098",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_099",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_100",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_101",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_102",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_103",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_104",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_105",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_106",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_107",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_108",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_109",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_110",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_111",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_112",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_113",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_114",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_115",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_116",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_117",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_118",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_119",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_120",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_121",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_122",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_123",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_124",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_125",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_126",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_127",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_128",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_129",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_130",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_131",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_132",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_133",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_134",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_135",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_136",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_137",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_138",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_139",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_140",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_141",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_142",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_143",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_144",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_145",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_146",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_147",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_148",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_149",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_150",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_151",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_152",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_153",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_154",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_155",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_156",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_157",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_158",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_159",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_160",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_161",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_162",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_163",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_164",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_165",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_166",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_167",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_168",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_169",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_170",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_171",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_172",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_173",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_174",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_175",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_176",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_177",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_178",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_179",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_180",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_181",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_182",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_183",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_184",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_185",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_186",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_187",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_188",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_189",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_190",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_191",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_192",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_193",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_194",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_195",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_196",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_197",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_198",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_199",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_200",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_201",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_202",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_203",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_204",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_205",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_206",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_207",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_208",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_209",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_210",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_211",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_212",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_213",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_214",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_215",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_216",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_217",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_218",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_219",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_220",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_221",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_222",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_223",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_224",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_225",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_226",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_227",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_228",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_229",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_230",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_231",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_232",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_233",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_234",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_235",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_236",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_237",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_238",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_239",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_240",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_241",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_242",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_243",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_244",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_245",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_246",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_247",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_248",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_249",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_250",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_251",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_252",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_253",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_254",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_255",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_256",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_257",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_258",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_259",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_260",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_261",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_262",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_263",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_264",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_265",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_266",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_267",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_268",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_269",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_270",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_271",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_272",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_273",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_274",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_275",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_276",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_277",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_278",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_279",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_280",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_281",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_282",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_283",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_284",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_285",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_286",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_287",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_288",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_289",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_290",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_291",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_292",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_293",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_294",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_295",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_296",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_297",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_298",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_299",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_300",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_301",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_302",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_303",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_304",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_305",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_306",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_307",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_308",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_309",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_310",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_311",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_312",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_313",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_314",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_315",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_316",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_317",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_318",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_319",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_320",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_321",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_322",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_323",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_324",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_325",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_326",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_327",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_328",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_329",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_330",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_331",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_332",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_333",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_334",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_335",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_336",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_337",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_338",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_339",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_340",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_341",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_342",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_343",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_344",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_345",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_346",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_347",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_348",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_349",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_350",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_351",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_352",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_353",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_354",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_355",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_356",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_357",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_358",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_359",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_360",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_361",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_362",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_363",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_364",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_365",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_366",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_367",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_368",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_369",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_370",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_371",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_372",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_373",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_374",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_375",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_376",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_377",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_378",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_379",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_380",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_381",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_382",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_383",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_384",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_385",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_386",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_387",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_388",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_389",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_390",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_391",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_392",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_393",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_394",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_395",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_396",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_397",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_398",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_399",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_400",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_401",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_402",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_403",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_404",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_405",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_406",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_407",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_408",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_409",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_410",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_411",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_412",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_413",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_414",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_415",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_416",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_417",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_418",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_419",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_420",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_421",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_422",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_423",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_424",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_425",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_426",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_427",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_428",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_429",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_430",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_431",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_432",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_433",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_434",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_435",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_436",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_437",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_438",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_439",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_440",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_441",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_442",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_443",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_444",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_445",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_446",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_447",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_448",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_449",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_450",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_451",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_452",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_453",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_454",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_455",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_456",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_457",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_458",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_459",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_460",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_461",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_462",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_463",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_464",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_465",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_466",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_467",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_468",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_469",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_470",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_471",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_472",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_473",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_474",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_475",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_476",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_477",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_478",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_479",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_480",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_481",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_482",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_483",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_484",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_485",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_486",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_487",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_488",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_489",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_490",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_491",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_492",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_493",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_494",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_495",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_496",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_497",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_498",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_499",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_500",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_501",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_502",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_503",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_504",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_505",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_506",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_507",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_508",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_509",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_510",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_511",
+        "model": "vfx_mote"
+      },
+      {
+        "name": "mote_512",
+        "model": "vfx_mote"
+      }
+    ]
+  }
+}

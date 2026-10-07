@@ -1,0 +1,4 @@
+# Настройки запуска проекта VoxelCore.
+name = "wisplib"
+title = "WispLib"
+base_packs = ["base", "wisplib"]

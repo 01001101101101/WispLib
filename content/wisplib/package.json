@@ -1,0 +1,11 @@
+{
+  "id": "wisplib",
+  "title": "WispLib",
+  "version": "0.3.3",
+  "creator": "01001101101101",
+  "description": "Reusable VFX runtime API for VoxelCore content packs with billboard, mesh, Entity and audio cues.",
+  "dependencies": [
+    "!base@>=0.32"
+  ],
+  "license": "MIT"
+}

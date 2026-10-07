@@ -1,0 +1,10 @@
+{
+  "skeleton-name": "wisplib:vfx_cloud",
+  "components": ["wisplib:mesh_emitter"],
+  "body-type": "kinematic",
+  "hitbox": [0.01, 0.01, 0.01],
+  "solid": false,
+  "selectable": false,
+  "blocking": false,
+  "save": false
+}

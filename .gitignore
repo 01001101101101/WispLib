@@ -1,0 +1,11 @@
+# VoxelCore generates content.json; do not commit generated pack indexes.
+content/**/content.json
+
+# Local worlds, settings, backups and runtime output.
+/userfiles/
+*.log
+/crash_reports/
+/cache/
+
+# Local project customization.
+/project_client.lua

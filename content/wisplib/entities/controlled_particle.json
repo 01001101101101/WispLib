@@ -1,0 +1,10 @@
+{
+  "skeleton-name": "wisplib:vfx_particle",
+  "components": [],
+  "body-type": "dynamic",
+  "hitbox": [0.08, 0.08, 0.08],
+  "solid": false,
+  "selectable": false,
+  "blocking": false,
+  "save": false
+}

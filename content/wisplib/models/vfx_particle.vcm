@@ -1,0 +1,1 @@
+@box from (-0.5,-0.5,-0.5) to (0.5,0.5,0.5) texture "blocks:white" shading off
