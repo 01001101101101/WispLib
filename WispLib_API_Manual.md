@@ -2,6 +2,8 @@
 
 WispLib читает описание эффекта из JSON и возвращает Lua handle для управления его экземпляром. Один эффект может состоять из нескольких emitters и звуков. Публичная точка входа — `require "wisplib:vfx"`.
 
+В этой редакции описан пакет **0.3.4**: Lua API **0.2.0**, формат definitions **schema 1**, целевая версия VoxelCore — **0.32**. Версия пакета, версия Lua API и номер схемы независимы.
+
 ## Минимальный пример API
 
 Пошаговый запуск в клиенте с готовым обработчиком `on_hud_open` показан в [руководстве для разработчика](WispLib_Руководство_разработчика.md). Здесь — короткий пример формата и вызовов API.
@@ -15,7 +17,7 @@ WispLib читает описание эффекта из JSON и возвращ
   "version": "0.1.0",
   "creator": "Your Name",
   "description": "My WispLib effects",
-  "dependencies": ["!base@>=0.32", "!wisplib@>=0.3.3"]
+  "dependencies": ["!base@>=0.32", "!wisplib@>=0.3.4"]
 }
 ```
 
@@ -85,7 +87,11 @@ end
 
 `preset` у billboard — объект native particle settings либо путь/Content ID JSON preset; строке без `.json` расширение добавляется автоматически. Mesh backend по умолчанию создаёт `wisplib:mesh_emitter`. Один контейнер вмещает не более 512 slots; при большем количестве создаются дополнительные контейнеры. Это вместимость, а не гарантированный предел производительности.
 
+Внутри native preset поле `texture` ссылается на **имя атласа и регион**, например `"particles:smoke_0"` для встроенного дыма. Это не путь к файлу `base:particles/smoke_0`. Перед созданием billboard emitter WispLib проверяет texture и каждый alias из `frames` через клиентский `assets.to_canvas()`. Если alias отсутствует, `spawn()` возвращает ошибку с ID эффекта, номером emitter и именем текстуры. Успешно проверенные aliases кэшируются на время работы Lua-модуля; после горячей замены ассетов запустите новую Lua-сессию.
+
 Для Entity `spawn.mode` по умолчанию `burst`: `spawn.count` задаёт число частиц (по умолчанию 1). Режим `rate` использует `spawn.rate` в частицах за секунду и необязательный общий `spawn.limit`. У billboard режим по умолчанию `rate`; `burst` выпускает `spawn.count`. Для mesh количество задаёт `settings.count` (по умолчанию 128); `settings.loop: false` делает его конечным.
+
+Для controlled mesh WispLib расширяет `transform.size` контейнера до границы заданных poses и компенсирует этот размер в локальных transform slots. `settings.bounds_model_radius` (по умолчанию `1`) задаёт запас для геометрии **одной** модели в её собственных координатах. Укажите большее значение, если ваша модель выступает за эту сферу; иначе frustum culling может скрыть край эффекта. Размер контейнера растёт по мере движения частиц и не уменьшается до пересоздания контейнера.
 
 Пример отдельного mesh effect:
 
@@ -140,11 +146,11 @@ if not ok then print(err) end
 
 `billboard_rate_recreated` означает пересоздание rate emitter; `billboard_burst_deferred` — уже выпущенный burst не изменился, новые настройки применятся после `restart()`; для смешанного эффекта возвращается `billboard_rate_recreated_burst_deferred`. При успехе `err == nil`.
 
-`pause()` останавливает выпуск billboard particles, но уже выпущенные частицы продолжают двигаться в движке. `resume()` вновь создаёт rate emitter; для повторного burst вызовите `restart()`. `stop()` даёт живым частицам завершиться. `destroy()` удаляет экземпляр и его Entity/mesh-контейнеры. Поштучного удаления native billboard particles этот API не даёт.
+`pause()` останавливает выпуск billboard particles, но уже выпущенные частицы продолжают двигаться в движке. `resume()` вновь создаёт rate emitter; для повторного burst вызовите `restart()`. `stop()` даёт живым частицам завершиться. `destroy()` удаляет экземпляр и его Entity/mesh-контейнеры. Поштучного удаления native billboard particles этот API не даёт. После перехода в `finished` handle остаётся в памяти, чтобы его можно было перезапустить; если перезапуск не нужен, вызовите `destroy()`.
 
 ## Привязать эффект и задать движение
 
-Anchor может быть статическим `{type = "world", position = {x, y, z}}` или `{type = "entity", uid = some_uid}`. Entity UID должен существовать при `spawn()` и `set_anchor()`. Пространства `world`, `local`, `parent`; для `local`/`parent` нужен anchor. Если `anchor` передан без `space`, используется `local`. `position` в локальном пространстве — смещение от anchor. Для нового кода используйте `anchor`; `parent = uid` и `attach()` сохранены для старого способа привязки.
+Anchor может быть статическим `{type = "world", position = {x, y, z}}` или `{type = "entity", uid = some_uid}`. Entity UID должен существовать при `spawn()` и `set_anchor()`. Пространства `world`, `local`, `parent`; для `local`/`parent` нужен anchor. Если `anchor` передан без `space`, используется `local`. В текущей реализации `parent` рассчитывается так же, как `local`: отдельного преобразования для него пока нет. `position` в этих пространствах — смещение от anchor. Для нового кода используйте `anchor`; `parent = uid` и `attach()` сохранены для старого способа привязки.
 
 ```lua
 local fx, err = vfx.spawn("mygame:orbit", {
@@ -156,6 +162,8 @@ local fx, err = vfx.spawn("mygame:orbit", {
 ```
 
 Для игрока получите `entity_uid` через `player.get_entity(hud.get_player())`: ID игрока и UID Entity различаются. При исчезновении Entity anchor `anchor_policy` задаёт действие: `freeze` (по умолчанию) удерживает последний transform, `stop` прекращает выпуск, `destroy` удаляет эффект, `detach` снимает привязку. Bone/socket anchors отсутствуют. Для billboard привязка обновляет origin нативного emitter; WispLib не задаёт transform уже выпущенных billboard particles.
+
+У Entity particles начальная позиция и встроенные controllers `follow`/`orbit` учитывают одновременно `anchor.offset` и локальную `position` эффекта. Например, при положении Entity `{0, 40, 0}`, `anchor.offset = {0, 1, 0}` и `position = {0, 2, 0}` центр эффекта находится в `{0, 43, 0}`. Настройка `controller.orbit.speed` задаётся в радианах в секунду; углы `appearance.rotation` и `rotation_speed` для матриц `mat4.rotate` задаются в градусах.
 
 `controlled` назначает transform каждого Entity/mesh particle на каждом update. `simulated` использует симуляцию backend. `hybrid` начинает с controller и позволяет затем вызвать `release_particles()` для Entity. Например, `fx:release_particles({velocity = "radial", speed = 3})` рассчитывает скорость от центра эффекта; фиксированный вектор передаётся как `{velocity = {0, 4, 0}}`. Mesh slots нельзя превратить в отдельные Rigidbody.
 
@@ -283,7 +291,7 @@ Modifier для Entity может вернуть `acceleration` или `velocity
 
 ## Сохранить эффект в мире
 
-`vfx.world` хранит описание эффекта, а не живые Entity, возраст или скорость частиц. Для `create()` нужен открытый мир. Путь создаётся штатной функцией `pack.data_file("wisplib", "world_effects.json")`; разрешение `write-to-user` не требуется. При обычном подключении `scripts/world.lua` загружает записи при открытии мира, сохраняет их при сохранении и выходе, затем очищает runtime состояние. После изменения записи можно вызвать `save()` сразу.
+`vfx.world` хранит описание эффекта, а не живые Entity, возраст или скорость частиц. Для `create()` нужен открытый мир. Пути создаёт штатная функция `pack.data_file()` внутри `world:data/wisplib/`; разрешение `write-to-user` не требуется. При обычном подключении `scripts/world.lua` загружает записи при открытии мира, сохраняет их при сохранении и выходе, затем очищает runtime состояние. После изменения записи можно вызвать `save()` сразу.
 
 ```lua
 local saved, err = vfx.world.create("mygame:orbit", {
@@ -305,7 +313,7 @@ if not ok then print(save_error) end
 
 `vfx.world` предоставляет `create`, `get`, `get_by_name`, `list`, `find_by_tag`, `duplicate`, `delete`, `save`, `load`, `clear`, `stop_runtime`. WorldHandle предоставляет `get`, `get_parameter`, `start`, `stop`, `restart`, `move`, `set_rotation`, `set_scale`, `set`/`set_parameter`, `set_name`, `set_autostart`, `set_tags`, `set_audio`, `set_anchor`, `set_controller`, `enable`, `disable`, `save`, `delete`, `exists`. `set_controller()` перезапускает активный runtime. Методы `world.close()` и `world.start_pending_client()` обслуживают жизненный цикл WispLib и обычно не нужны игровому коду.
 
-В запись входят ID, имя, effect ID, transform, параметры, controller, points, motion, audio, tags и flags. Lua closures и Entity UID не сериализуются. Для `anchor`, `source`, `target` допустимы только статические world anchors. Пользовательские Lua extensions должны быть вновь зарегистрированы до восстановления effects. Файл хранится в `world:data/wisplib/world_effects.json`, отдельно в каталоге каждого мира. Старые файлы `user:wisplib/world_effects_<seed>_<generator>.json` не импортируются автоматически: такой путь мог принадлежать нескольким мирам с одинаковыми seed и generator. Для переноса скопируйте нужный файл в `data/wisplib/world_effects.json` конкретного мира до его открытия. Запись файла выполняется напрямую; атомарная замена через временный файл API VoxelCore здесь не используется. Если файл повреждён, `load()` сообщит об ошибке и `save()` не станет его перезаписывать; проверяйте ошибку перед ручным `clear()`.
+В запись входят ID, имя, effect ID, transform, параметры, controller, points, motion, audio, tags и flags. Lua closures и Entity UID не сериализуются. Для `anchor`, `source`, `target` допустимы только статические world anchors. Пользовательские Lua extensions должны быть вновь зарегистрированы до восстановления effects. WispLib чередует файлы `world:data/wisplib/world_effects.a.json` и `world_effects.b.json`: каждая запись содержит номер поколения, JSON-снимок и контрольную сумму Adler-32. После записи файл перечитывается. При загрузке берётся новейший целый slot; при его повреждении используется предыдущий. Если повреждены оба, `load()` и `save()` возвращают ошибку, не заменяя данные в памяти. `clear()` тоже откажется перезаписывать обе повреждённые копии: восстановите или удалите их вручную после резервного копирования. Отсутствующий effect definition блокирует загрузку и автоматическое сохранение, чтобы запись не пропала. Старый `world_effects.json` формата schema 1 читается, пока не появились slots; после успешной записи и проверки первого slot старый файл удаляется. Ещё более старые файлы `user:wisplib/world_effects_<seed>_<generator>.json` не импортируются автоматически: для переноса скопируйте нужный файл в `data/wisplib/world_effects.json` конкретного мира до открытия. Запись slot выполняется напрямую: без `fsync` и атомарного rename абсолютная сохранность при отключении питания не гарантируется. После восстановления файла повторите `load()`.
 
 ## Справка по функциям модуля
 

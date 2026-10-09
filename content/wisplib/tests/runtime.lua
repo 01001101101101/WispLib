@@ -99,6 +99,43 @@ assert(vfx.register("wisplib_tests:vfx_mesh_controlled", {
     }},
 }))
 
+assert(vfx.register("wisplib_tests:vfx_default_burst", {
+    schema = 1,
+    emitters = {{
+        backend = "entity", particle = "wisplib:controlled_particle",
+        spawn = {count = 2}, lifetime = 60,
+        collision = {type = "none"}, physics = {gravity = 0},
+    }},
+}))
+local local_spawn = assert(vfx.spawn("wisplib_tests:vfx_default_burst", {
+    anchor = {type = "entity", uid = player_uid, offset = {0, 1, 0}},
+    position = {0, 2, 0}, space = "local",
+}))
+assert(#particles_near({0, 43, 0}, 0.25) == 2,
+    "Entity particles must start at the effect's local offset, including the anchor offset")
+assert(local_spawn:destroy())
+
+local default_burst = assert(vfx.spawn("wisplib_tests:vfx_default_burst", {position = {90, 50, 0}}))
+assert(default_burst:set_count(4))
+assert(#particles_near({90, 50, 0}, 0.25) == 4,
+    "set_count must work when burst is the implicit Entity spawn mode")
+assert(default_burst:destroy())
+
+for _, controller in ipairs({
+    {type = "orbit", radius = 0},
+    {type = "follow", offset = {0, 0, 0}},
+}) do
+    local offset_effect = assert(vfx.spawn("wisplib_tests:vfx_reference", {
+        anchor = {type = "entity", uid = player_uid, offset = {0, 1, 0}},
+        position = {0, 2, 0}, space = "local", motion = "controlled",
+        parameters = {count = 1}, controller = controller,
+    }))
+    tick(2)
+    assert(#particles_near({0, 43, 0}, 0.25) == 1,
+        controller.type .. " must use the effect transform including its local position")
+    assert(offset_effect:destroy())
+end
+
 local fx = assert(vfx.spawn("wisplib_tests:vfx_runtime_points", {
     anchor = {type = "entity", uid = player_uid},
     space = "local",
@@ -282,6 +319,68 @@ for _, host in ipairs(mesh_hosts) do
 end
 assert(mesh_controlled:destroy())
 
+assert(vfx.register("wisplib_tests:vfx_finite_mesh", {
+    schema = 1,
+    motion = "controlled",
+    controller = {type = "points", space = "local", points = {{0, 0, 0}, {1, 0, 0}}},
+    emitters = {{
+        backend = "mesh", container = "wisplib:mesh_emitter", motion = "controlled",
+        settings = {count = 2, size = 0.055, lifetime = 0.05, loop = false},
+    }},
+}))
+local finite_mesh = assert(vfx.spawn("wisplib_tests:vfx_finite_mesh", {
+    position = {34, 60, 0},
+}))
+vfx.update(0.06)
+assert(finite_mesh:state() == "finished",
+    "controlled mesh slots with loop=false must expire and finish the effect")
+assert(finite_mesh:destroy())
+
+assert(vfx.register("wisplib_tests:vfx_finite_mesh_resize", {
+    schema = 1,
+    motion = "controlled",
+    controller = {type = "points", space = "local", points = {{0, 0, 0}, {1, 0, 0}}},
+    emitters = {{
+        backend = "mesh", motion = "controlled",
+        settings = {count = 2, lifetime = 0.25, loop = false},
+    }},
+}))
+local resized_mesh = assert(vfx.spawn("wisplib_tests:vfx_finite_mesh_resize", {
+    position = {35, 60, 0},
+}))
+vfx.update(0.15)
+assert(resized_mesh:set_count(1))
+vfx.update(0.1)
+assert(resized_mesh:set_count(2))
+vfx.update(0.16)
+assert(resized_mesh:state() == "running",
+    "a mesh slot added after resizing must get a new controlled lifetime")
+assert(resized_mesh:destroy())
+
+local largest_rate_particle_count = 0
+assert(vfx.register_controller("wisplib_tests:rate_compaction", function()
+    return {update_particle = function(_, particle, dt, context)
+        largest_rate_particle_count = math.max(largest_rate_particle_count, context.particle_count)
+        return {position = {36, 60, 0}, space = "world"}
+    end}
+end))
+assert(vfx.register("wisplib_tests:vfx_controlled_rate", {
+    schema = 1,
+    motion = "controlled", controller = {type = "wisplib_tests:rate_compaction"},
+    emitters = {{
+        backend = "entity", particle = "wisplib:controlled_particle",
+        spawn = {mode = "rate", rate = 10, limit = 8}, lifetime = 0.15,
+        collision = {type = "none"}, physics = {gravity = 0},
+    }},
+}))
+local controlled_rate = assert(vfx.spawn("wisplib_tests:vfx_controlled_rate", {
+    position = {36, 60, 0},
+}))
+for _ = 1, 8 do vfx.update(0.1) end
+assert(largest_rate_particle_count <= 2,
+    "expired controlled rate particles must not remain in the controller's particle_count")
+assert(controlled_rate:destroy())
+
 local parameter_effect = assert(vfx.spawn("wisplib_tests:vfx_reference", {
     position = {26, 55, 0}, parameters = {count = 3, size = 0.2, color = {0.8, 0.3, 0.1}},
 }))
@@ -370,6 +469,25 @@ assert(action_effect:emit("on_collision", {test = true}))
 assert(action_calls == 3, "definition actions should invoke registered pack callbacks")
 assert(action_effect:destroy())
 
+assert(vfx.register("wisplib_tests:vfx_spawn_action", {
+    schema = 1,
+    events = {on_collision = {{type = "spawn_effect", effect = "wisplib_tests:vfx_runtime_points"}}},
+    emitters = {},
+}))
+local action_parent = assert(vfx.spawn("wisplib_tests:vfx_spawn_action", {
+    position = {66, 55, 0},
+}))
+assert(action_parent:emit("on_collision", {test = true}))
+assert(action_parent:get("action_error") == nil,
+    "spawn_effect must resolve the parent effect's position")
+local spawned_child
+for _, handle in ipairs(vfx.handles()) do
+    if handle.name == "wisplib_tests:vfx_runtime_points" then spawned_child = handle end
+end
+assert(spawned_child and spawned_child:get("position")[1] == 66,
+    "spawn_effect must create its child at the parent effect's position")
+assert(spawned_child:destroy() and action_parent:destroy())
+
 local persistent = assert(vfx.world.create("wisplib_tests:vfx_runtime_points", {
     name = "headless_round_trip",
     position = {20, 50, 0},
@@ -381,14 +499,53 @@ local persistent = assert(vfx.world.create("wisplib_tests:vfx_runtime_points", {
 }))
 assert(persistent.id == "world_fx_1")
 assert(vfx.world.save())
-local world_effect_path = pack.data_file("wisplib", "world_effects.json")
-local good_world_effects = file.read(world_effect_path)
-assert(type(good_world_effects) == "string" and #good_world_effects > 0)
-file.write(world_effect_path, '{"schema":99,"effects":[]}')
-local malformed_ok = vfx.world.load()
-assert(malformed_ok == false and persistent:exists(),
-    "invalid saved schema must leave active WorldEffect records intact")
-file.write(world_effect_path, good_world_effects)
+assert(vfx.world.save(), "both storage slots should contain a recoverable record")
+local storage_paths = {pack.data_file("wisplib", "world_effects.a.json"),
+    pack.data_file("wisplib", "world_effects.b.json")}
+local slots = {json.parse(file.read(storage_paths[1])), json.parse(file.read(storage_paths[2]))}
+local latest_index = slots[1].generation > slots[2].generation and 1 or 2
+local previous_index = 3 - latest_index
+local good_latest = file.read(storage_paths[latest_index])
+local good_previous = file.read(storage_paths[previous_index])
+assert(slots[latest_index].generation == slots[previous_index].generation + 1)
+local function checksum(content)
+    local a, b = 1, 0
+    for index = 1, #content do
+        a = (a + content:byte(index)) % 65521
+        b = (b + a) % 65521
+    end
+    return string.format("%08x", b * 65536 + a)
+end
+local missing_definition = json.parse(slots[latest_index].payload)
+missing_definition.effects[#missing_definition.effects + 1] = {
+    id = "world_fx_999", effect_id = "wisplib_tests:missing_definition",
+    transform = {position = {20, 50, 0}, rotation = mat4.idt(), scale = 1},
+}
+slots[latest_index].payload = json.tostring(missing_definition)
+slots[latest_index].checksum = checksum(slots[latest_index].payload)
+file.write(storage_paths[latest_index], json.tostring(slots[latest_index]))
+local partial_ok = vfx.world.load()
+assert(partial_ok == false and persistent:exists(),
+    "an unavailable definition must not replace the active WorldEffect set")
+assert(vfx.world.save() == false,
+    "automatic save must not erase a WorldEffect whose definition is unavailable")
+file.write(storage_paths[latest_index], '{"schema":2,"generation":999}')
+local recovered, recovery_errors = vfx.world.load()
+assert(recovered and #recovery_errors == 0 and persistent:exists(),
+    "a corrupt latest slot must recover from the previous complete slot")
+local invalid_payload = json.parse(good_latest)
+invalid_payload.payload = '{"schema":99,"effects":[]}'
+invalid_payload.checksum = checksum(invalid_payload.payload)
+file.write(storage_paths[latest_index], json.tostring(invalid_payload))
+recovered, recovery_errors = vfx.world.load()
+assert(recovered and #recovery_errors == 0 and persistent:exists(),
+    "an unsupported newest payload must recover from the previous slot")
+file.write(storage_paths[previous_index], '{"schema":2,"generation":1000}')
+assert(vfx.world.load() == false and persistent:exists(),
+    "two corrupt slots must not replace active WorldEffects")
+assert(vfx.world.save() == false, "two corrupt slots must not be overwritten")
+file.write(storage_paths[latest_index], good_latest)
+file.write(storage_paths[previous_index], good_previous)
 vfx.world.stop_runtime()
 local loaded, load_errors = vfx.world.load()
 assert(loaded and #load_errors == 0)
@@ -428,6 +585,54 @@ local entity_anchor, entity_error = vfx.world.create("wisplib_tests:vfx_runtime_
 })
 assert(entity_anchor == nil and entity_error:find("cannot be persisted"))
 assert(vfx.world.clear())
+
+-- A world saved by an older WispLib version must load from the single-file
+-- schema and migrate to the alternating slots on its next save.
+file.remove(storage_paths[1])
+file.remove(storage_paths[2])
+local legacy_path = pack.data_file("wisplib", "world_effects.json")
+file.write(legacy_path, json.parse(good_latest).payload)
+loaded, load_errors = vfx.world.load()
+assert(loaded and #load_errors == 0 and vfx.world.get_by_name("headless_round_trip"),
+    "legacy schema-1 WorldEffects must remain readable")
+assert(vfx.world.save() and file.exists(storage_paths[1]),
+    "saving a legacy world must create a checked storage slot")
+assert(not file.exists(legacy_path),
+    "a verified migration must remove the stale single-file fallback")
+assert(vfx.world.clear())
+
+-- Host culling size must encompass controlled slots without scaling their
+-- world-space pose. A slot with no new pose must remain stable as bounds grow.
+local bounds_second_x = 4
+local bounds_skip_first = false
+assert(vfx.register_controller("wisplib_tests:bounds_controller", function()
+    return {update_particle = function(_, _, _, context)
+        if context.particle_index == 1 and bounds_skip_first then return nil end
+        local offset = context.particle_index == 1 and 0 or bounds_second_x
+        return {position = {130 + offset, 50, 0}, space = "world", scale = 1}
+    end}
+end))
+assert(vfx.register("wisplib_tests:bounds_mesh", {schema = 1, motion = "controlled", emitters = {{
+    backend = "mesh", motion = "controlled", container = "wisplib:mesh_emitter",
+    settings = {count = 2, size = 0.1, loop = true, bounds_model_radius = 1},
+    controller = {type = "wisplib_tests:bounds_controller"},
+}}}))
+local bounds_effect = assert(vfx.spawn("wisplib_tests:bounds_mesh", {position = {130, 50, 0}}))
+vfx.update(0.05)
+local bounds_host
+for _, uid in ipairs(entities.get_all_in_radius({130, 50, 0}, 2)) do
+    if entities.get_def(uid) == entities.def_index("wisplib:mesh_emitter") then
+        bounds_host = entities.get(uid)
+    end
+end
+assert(bounds_host, "controlled mesh host must exist")
+local first_bound = bounds_host.transform:get_size()[1]
+assert(first_bound > 4, "host culling box must reach the far controlled particle")
+bounds_skip_first, bounds_second_x = true, 8
+vfx.update(0.05)
+local second_bound = bounds_host.transform:get_size()[1]
+assert(second_bound > 8)
+assert(bounds_effect:destroy())
 
 app.close_world(true)
 app.delete_world("wisplib-runtime-test-12")

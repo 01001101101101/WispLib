@@ -262,7 +262,6 @@ local function set_count(value)
     local wanted = clamp(math.floor((tonumber(value) or 0) + 0.5), 0, CAPACITY)
     for index = 1, CAPACITY do
         local visible = index <= wanted
-        skeleton:set_visible(index, visible)
         if visible and index > active_count then
             seed_particle(particles[index], settings.loop ~= false, index)
             live_count = live_count + 1
@@ -272,6 +271,7 @@ local function set_count(value)
                 particles[index].alive = false
             end
         end
+        skeleton:set_visible(index, visible and particles[index].alive)
     end
     active_count = wanted
 end
@@ -394,7 +394,8 @@ end
 
 local function apply_particle_pose(index, update)
     index = math.floor(tonumber(index) or 0)
-    if index < 1 or index > active_count or not particles[index] then return false end
+    if index < 1 or index > active_count or not particles[index]
+        or not particles[index].alive then return false end
     local position, rotation = update.position, update.rotation
     if type(position) ~= "table" or #position < 3 then return false end
     local matrix = particles[index].matrix
@@ -436,6 +437,16 @@ this.set_particle_poses = function(updates)
         end
     end
     return applied
+end
+
+this.expire_particle = function(index)
+    index = math.floor(tonumber(index) or 0)
+    local particle = particles[index]
+    if not particle or index < 1 or index > active_count or not particle.alive then return false end
+    particle.alive = false
+    live_count = math.max(0, live_count - 1)
+    skeleton:set_visible(index, false)
+    return true
 end
 
 this.get_particle_scale = function(index)

@@ -50,7 +50,7 @@ base_packs = ["base", "wisplib", "mypack"]
   "description": "My first WispLib effect",
   "dependencies": [
     "!base@>=0.32",
-    "!wisplib@>=0.3.3"
+    "!wisplib@>=0.3.4"
   ]
 }
 ```
@@ -171,7 +171,7 @@ ring:destroy()               -- удалить его
 
 ## Временный и сохраняемый эффект
 
-`vfx.spawn(...)` создаёт runtime instance. Его частицы и handle не записываются в мир. Для эффекта, который должен появиться снова после загрузки мира, используйте `vfx.world.create(...)`. WorldEffect сохраняет ID definition, положение и сериализуемые настройки в каталоге текущего мира (`world:data/wisplib/world_effects.json`); симуляция частиц при загрузке начинается заново. Дополнительное разрешение `write-to-user` не требуется. Пример и ограничения сериализации приведены в [разделе WorldEffect справочника API](WispLib_API_Manual.md).
+`vfx.spawn(...)` создаёт runtime instance. Его частицы и handle не записываются в мир. Для эффекта, который должен появиться снова после загрузки мира, используйте `vfx.world.create(...)`. WorldEffect сохраняет ID definition, положение и сериализуемые настройки в двух чередующихся файлах каталога текущего мира (`world:data/wisplib/world_effects.a.json` и `world_effects.b.json`); симуляция частиц при загрузке начинается заново. Дополнительное разрешение `write-to-user` не требуется. Пример и ограничения сериализации приведены в [разделе WorldEffect справочника API](WispLib_API_Manual.md).
 
 ## Если эффекта не видно
 

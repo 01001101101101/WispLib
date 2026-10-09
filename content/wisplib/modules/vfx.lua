@@ -20,6 +20,7 @@ local generation = 1
 local last_update = time.precise_time()
 local fire_event
 local play_effect_audio_event
+local current_position
 
 local Handle = {}
 Handle.__index = Handle
@@ -1124,6 +1125,12 @@ function API.validate(id, def)
         if backend == "mesh" and emitter.settings ~= nil and type(emitter.settings) ~= "table" then
             return false, id .. ": mesh emitter " .. index .. " settings must be an object"
         end
+        if backend == "mesh" and type(emitter.settings) == "table"
+            and emitter.settings.bounds_model_radius ~= nil
+            and not valid_spawn_number(emitter.settings.bounds_model_radius, def.parameters, false) then
+            return false, id .. ": mesh emitter " .. index
+                .. " settings.bounds_model_radius must be a non-negative number or number parameter"
+        end
         if emitter.appearance ~= nil and type(emitter.appearance) ~= "table" then
             return false, id .. ": emitter " .. index .. " appearance must be an object"
         end
@@ -1387,7 +1394,7 @@ local function validate_parameter_overrides(definition, supplied, label)
     return result
 end
 
-local function current_position(effect)
+current_position = function(effect)
     return effect_transform(effect).position
 end
 
@@ -1539,12 +1546,27 @@ local function make_controller(effect, requested_config)
     return controller
 end
 
-controller_context = function(effect, dt, index, count, particle, emitter)
-    local transform = effect_transform(effect)
+local function controller_anchor_snapshot(effect, transform)
+    transform = transform or effect_transform(effect)
     local source, source_valid = resolve_anchor(effect.source_anchor, effect.last_source_transform or transform)
     local target, target_valid = resolve_anchor(effect.target_anchor, effect.last_target_transform or transform)
     if source_valid then effect.last_source_transform = clone(source) end
     if target_valid then effect.last_target_transform = clone(target) end
+    return {effect = transform, source = source, target = target,
+        source_valid = source_valid, target_valid = target_valid}
+end
+
+controller_context = function(effect, dt, index, count, particle, emitter, anchor_snapshot)
+    local anchors = anchor_snapshot or controller_anchor_snapshot(effect)
+    local transform = anchors.effect
+    local slot_age = (emitter and emitter.controller_ages and emitter.controller_ages[index])
+        or (effect.controller_ages and effect.controller_ages[index]) or 0
+    local slot_lifetime = (emitter and emitter.controller_lifetimes and emitter.controller_lifetimes[index])
+        or effect.duration or 1
+    local normalized_slot_age = slot_age
+    if emitter and emitter.mode == "loop" and slot_lifetime > 0 then
+        normalized_slot_age = slot_age % slot_lifetime
+    end
     return {
         dt = dt,
         time = effect.age,
@@ -1552,14 +1574,13 @@ controller_context = function(effect, dt, index, count, particle, emitter)
         particle_index = index,
         particle_count = count,
         normalized_index = count <= 1 and 0 or (index - 1) / (count - 1),
-        particle_age = particle and particle.age or (effect.controller_ages and effect.controller_ages[index]) or 0,
+        particle_age = particle and particle.age or slot_age,
         normalized_age = particle and particle.lifetime and math.min(1, particle.age / particle.lifetime)
-            or math.min(1, ((effect.controller_ages and effect.controller_ages[index]) or 0) / math.max(0.001, effect.duration or 1)),
+            or math.min(1, normalized_slot_age / math.max(0.001, slot_lifetime)),
         emitter_index = emitter and emitter.index or nil,
         emitter = emitter and emitter.definition or nil,
         parameters = effect.parameters,
-        anchors = {effect = transform, source = source, target = target,
-            source_valid = source_valid, target_valid = target_valid},
+        anchors = anchors,
         effect_transform = transform,
         seed = effect.seed,
         rng = effect.random,
@@ -1607,11 +1628,12 @@ local function path_point(config, normalized)
     return path_evaluate(config, normalized)
 end
 
-local function built_in_particle_pose(effect, index, count, dt, particle, emitter)
-    local config = resolve((emitter and emitter.controller_config) or effect.controller_config or {},
-        effect, effect.random)
+local function built_in_particle_pose(effect, index, count, dt, particle, emitter, frame)
+    local config = frame and frame.config or resolve(
+        (emitter and emitter.controller_config) or effect.controller_config or {}, effect, effect.random)
     local kind = config.type or "follow"
-    local context = controller_context(effect, dt, index, count, particle, emitter)
+    local context = controller_context(effect, dt, index, count, particle, emitter,
+        frame and frame.anchors)
     local root = context.effect_transform
     local point, rotation, scale, color
     if kind == "orbit" then
@@ -1623,7 +1645,7 @@ local function built_in_particle_pose(effect, index, count, dt, particle, emitte
             + (index - 1) * (config.phase_step or (math.pi * 2 / math.max(1, count)))
         local radius = tonumber(config.radius) or 1
         local local_point = vadd(vmul(axis, config.height or 0), vadd(vmul(tangent, math.cos(angle) * radius), vmul(bitangent, math.sin(angle) * radius)))
-        point = vadd(root.anchor.position, rotate_vector(root.anchor.rotation, local_point))
+        point = point_in_transform(root, local_point, effect.inherit_scale)
     elseif kind == "points" then
         local points = effect.points or config.points or {}
         if #points == 0 then return nil, context end
@@ -1648,7 +1670,7 @@ local function built_in_particle_pose(effect, index, count, dt, particle, emitte
         if finite_vec3(config.offset) then local_offset = vadd(local_offset, config.offset) end
         local inherit_scale = config.inherit_scale
         if inherit_scale == nil then inherit_scale = effect.inherit_scale end
-        point = point_in_transform(root.anchor, local_offset, inherit_scale)
+        point = point_in_transform(root, local_offset, inherit_scale)
     end
     if not point then return nil, context end
     rotation = config.inherit_rotation == false and mat4.idt() or root.rotation
@@ -1659,7 +1681,7 @@ end
 
 local rotation_matrix
 
-local function controller_particle_pose(effect, index, count, dt, particle, emitter)
+local function controller_particle_pose(effect, index, count, dt, particle, emitter, frame)
     local controller = (emitter and emitter.controller_instance) or effect.controller_instance
     local pose, context
     if controller and type(controller.update_particle) == "function" then
@@ -1671,7 +1693,7 @@ local function controller_particle_pose(effect, index, count, dt, particle, emit
             effect.controller_error = tostring(result)
         end
     else
-        pose, context = built_in_particle_pose(effect, index, count, dt, particle, emitter)
+        pose, context = built_in_particle_pose(effect, index, count, dt, particle, emitter, frame)
     end
     local frame = (emitter and emitter.controller_frame) or effect.controller_frame
     if not pose and frame and finite_vec3(frame.position) then
@@ -1706,18 +1728,35 @@ rotation_matrix = function(value, fallback)
     return finite_mat4(fallback) and clone(fallback) or mat4.idt()
 end
 
-local function point_to_local(point, transform)
+local function point_to_local(point, transform, parent_inverse)
     local relative = vsub(point, transform.position)
-    local ok, inverse = pcall(mat4.inverse, transform.rotation)
-    if ok then relative = rotate_vector(inverse, relative) end
+    if parent_inverse then
+        relative = rotate_vector(parent_inverse, relative)
+    else
+        local ok, inverse = pcall(mat4.inverse, transform.rotation)
+        if ok then relative = rotate_vector(inverse, relative) end
+    end
     return relative
 end
 
-local function rotation_to_local(rotation, parent_rotation)
-    local ok, inverse = pcall(mat4.inverse, parent_rotation)
-    if not ok then return rotation end
+local function rotation_to_local(rotation, parent_rotation, parent_inverse)
+    local inverse = parent_inverse
+    if not inverse then
+        local ok, calculated = pcall(mat4.inverse, parent_rotation)
+        if not ok then return rotation end
+        inverse = calculated
+    end
     local success, result = pcall(mat4.mul, inverse, rotation)
     return success and result or rotation
+end
+
+local function contains_random_range(value)
+    if type(value) ~= "table" then return false end
+    if type(value.range) == "table" then return true end
+    for _, item in pairs(value) do
+        if contains_random_range(item) then return true end
+    end
+    return false
 end
 
 local mesh_settings
@@ -1780,15 +1819,39 @@ local function update_controlled_emitter(emitter, effect, dt)
                 })
             end
         end
+        -- Rate emitters can run indefinitely. Retaining dead particle records
+        -- would grow the array and distort controller particle_count/index.
+        for index = #emitter.particles, 1, -1 do
+            if emitter.particles[index].dead then table.remove(emitter.particles, index) end
+        end
     elseif emitter.containers then
+        local inverse_ok, parent_inverse = pcall(mat4.inverse, transform.rotation)
+        if not inverse_ok then parent_inverse = nil end
+        local controller = emitter.controller_instance or effect.controller_instance
+        local controller_config = emitter.controller_config or effect.controller_config or {}
+        local cache_built_in = not (controller and type(controller.update_particle) == "function")
+            and not contains_random_range(controller_config)
+        local controller_frame_cache
+        emitter.pose_history = emitter.pose_history or {}
+        emitter.container_bounds = emitter.container_bounds or {}
         for container_index, uid in ipairs(emitter.containers) do
             local entity = entities.exists(uid) and entities.get(uid)
             local component = entity and entity:get_component("wisplib:mesh_emitter")
             if entity then
                 entity.transform:set_pos(transform.position)
                 entity.transform:set_rot(transform.rotation)
-                entity.transform:set_size({1, 1, 1})
                 local settings = mesh_settings(emitter, effect, effect.random)
+                local model_radius = math.max(0, tonumber(settings.bounds_model_radius) or 1)
+                local history = emitter.pose_history[container_index] or {}
+                emitter.pose_history[container_index] = history
+                local old_bound = emitter.container_bounds[container_index] or 1
+                local new_bound = old_bound
+                if cache_built_in and settings.loop ~= false and not controller_frame_cache then
+                    controller_frame_cache = {
+                        config = resolve(controller_config, effect, effect.random),
+                        anchors = controller_anchor_snapshot(effect, transform),
+                    }
+                end
                 local capacity = settings.capacity or 512
                 local count = settings.count or 0
                 local first = (container_index - 1) * capacity + 1
@@ -1798,44 +1861,81 @@ local function update_controlled_emitter(emitter, effect, dt)
                 emitter.pose_batches[container_index] = pose_updates
                 local pose_count = 0
                 for particle_index = first, last do
-                    effect.controller_ages = effect.controller_ages or {}
-                    effect.controller_ages[particle_index] = (effect.controller_ages[particle_index] or 0) + dt
-                    local pose = controller_particle_pose(effect, particle_index, count, dt, nil, emitter)
-                    if pose and component and component.set_particle_pose then
-                        local local_position = point_to_local(pose.position, transform)
-                        if effect.inherit_scale then
-                            for axis = 1, 3 do
-                                local divisor = transform.scale[axis]
-                                if math.abs(divisor) > 0.000001 then local_position[axis] = local_position[axis] / divisor end
+                    emitter.controller_ages = emitter.controller_ages or {}
+                    emitter.controller_lifetimes = emitter.controller_lifetimes or {}
+                    emitter.controller_ages[particle_index] = (emitter.controller_ages[particle_index] or 0) + dt
+                    local local_index = particle_index - first + 1
+                    local particle_lifetime = component and component.get_particle_lifetime
+                        and component.get_particle_lifetime(local_index) or 1
+                    emitter.controller_lifetimes[particle_index] = particle_lifetime
+                    if settings.loop == false and emitter.controller_ages[particle_index] >= particle_lifetime then
+                        if component and component.expire_particle then component.expire_particle(local_index) end
+                        history[local_index] = nil
+                    else
+                        local pose = controller_particle_pose(effect, particle_index, count, dt,
+                            nil, emitter, settings.loop ~= false and controller_frame_cache or nil)
+                        if pose and component and component.set_particle_pose then
+                            local local_position = point_to_local(pose.position, transform, parent_inverse)
+                            if effect.inherit_scale then
+                                for axis = 1, 3 do
+                                    local divisor = transform.scale[axis]
+                                    if math.abs(divisor) > 0.000001 then local_position[axis] = local_position[axis] / divisor end
+                                end
                             end
+                            local local_rotation = rotation_to_local(pose.rotation, transform.rotation,
+                                parent_inverse)
+                            local life_age = emitter.controller_ages[particle_index]
+                            if settings.loop ~= false then
+                                life_age = life_age % math.max(0.001, particle_lifetime)
+                            end
+                            local life_ratio = math.max(0, math.min(1,
+                                life_age / math.max(0.001, particle_lifetime)))
+                            local base_scale = component.get_particle_scale
+                                and component.get_particle_scale(local_index)
+                                or scale_vector(settings.size or 0.06, 1)
+                            local life_scale = scale_vector(curve_sample(settings.scale_over_life, life_ratio, 1), 1)
+                            local pose_scale = vhadamard(scale_vector(pose.scale, effect.scale), life_scale)
+                            local base_color = component.get_particle_color
+                                and component.get_particle_color(local_index) or settings.color
+                            local color = pose.color or curve_sample(settings.color_over_life, life_ratio, base_color)
+                            color = apply_alpha(color, settings.alpha_over_life, life_ratio, settings.opacity)
+                            local raw_scale = vhadamard(base_scale, pose_scale)
+                            local extent = math.sqrt(local_position[1] * local_position[1]
+                                + local_position[2] * local_position[2]
+                                + local_position[3] * local_position[3]) + model_radius * math.max(
+                                math.abs(raw_scale[1]), math.abs(raw_scale[2]), math.abs(raw_scale[3]))
+                            if finite_number(extent) then new_bound = math.max(new_bound, extent) end
+                            local update = history[local_index] or {index = local_index}
+                            history[local_index] = update
+                            pose_count = pose_count + 1
+                            pose_updates[pose_count] = update
+                            update.raw_position = local_position
+                            update.rotation = local_rotation
+                            update.raw_scale = raw_scale
+                            update.color = color
+                            update.model = pose.model
                         end
-                        local local_rotation = rotation_to_local(pose.rotation, transform.rotation)
-                        local local_index = particle_index - first + 1
-                        local particle_lifetime = component.get_particle_lifetime
-                            and component.get_particle_lifetime(local_index) or 1
-                        local life_ratio = math.max(0, math.min(1,
-                            effect.controller_ages[particle_index] / math.max(0.001, particle_lifetime)))
-                        local base_scale = component.get_particle_scale
-                            and component.get_particle_scale(local_index)
-                            or scale_vector(settings.size or 0.06, 1)
-                        local life_scale = scale_vector(curve_sample(settings.scale_over_life, life_ratio, 1), 1)
-                        local pose_scale = vhadamard(scale_vector(pose.scale, effect.scale), life_scale)
-                        local base_color = component.get_particle_color
-                            and component.get_particle_color(local_index) or settings.color
-                        local color = pose.color or curve_sample(settings.color_over_life, life_ratio, base_color)
-                        color = apply_alpha(color, settings.alpha_over_life, life_ratio, settings.opacity)
-                        pose_count = pose_count + 1
-                        local update = pose_updates[pose_count] or {}
-                        pose_updates[pose_count] = update
-                        update.index = local_index
-                        update.position = local_position
-                        update.rotation = local_rotation
-                        update.scale = vhadamard(base_scale, pose_scale)
-                        update.color = color
-                        update.model = pose.model
                     end
                 end
                 while #pose_updates > pose_count do pose_updates[#pose_updates] = nil end
+                if new_bound > old_bound then
+                    emitter.container_bounds[container_index] = new_bound
+                    entity.transform:set_size({new_bound, new_bound, new_bound})
+                    -- Previously visible slots must be renormalized too, including
+                    -- slots whose controller returned no pose this frame.
+                    pose_count = 0
+                    for _, update in pairs(history) do
+                        pose_count = pose_count + 1
+                        pose_updates[pose_count] = update
+                    end
+                    while #pose_updates > pose_count do pose_updates[#pose_updates] = nil end
+                end
+                local inverse_bound = 1 / new_bound
+                for index = 1, pose_count do
+                    local update = pose_updates[index]
+                    update.position = vmul(update.raw_position, inverse_bound)
+                    update.scale = vmul(update.raw_scale, inverse_bound)
+                end
                 if pose_count > 0 and component and component.set_particle_poses then
                     component.set_particle_poses(pose_updates)
                 elseif component and component.set_particle_pose then
@@ -1950,9 +2050,31 @@ local function start_mesh(emitter, effect)
         index = index + 1
         remaining = remaining - batch
     until remaining <= 0
+    emitter.controller_count = count
+    emitter.controller_capacity = capacity
     emitter.mode = settings.loop == false and "burst" or "loop"
     emitter.finite = emitter.mode == "burst"
     emitter.running = true
+end
+
+local verified_particle_textures = {}
+
+local function require_particle_texture(texture, effect, emitter)
+    if type(texture) ~= "string" or texture == "" then
+        error("effect " .. effect.name .. " emitter " .. emitter.index
+            .. ": billboard preset needs a texture alias")
+    end
+    if verified_particle_textures[texture] then return end
+    if type(assets) ~= "table" or type(assets.to_canvas) ~= "function" then
+        error("effect " .. effect.name .. " emitter " .. emitter.index
+            .. ": client assets.to_canvas is unavailable")
+    end
+    local ok, canvas = pcall(assets.to_canvas, texture)
+    if not ok or canvas == nil then
+        error("effect " .. effect.name .. " emitter " .. emitter.index
+            .. ": billboard texture alias " .. texture .. " is unavailable")
+    end
+    verified_particle_textures[texture] = true
 end
 
 local function start_billboard(emitter, effect)
@@ -1960,6 +2082,10 @@ local function start_billboard(emitter, effect)
     local preset, err = load_particle_preset(def.preset)
     if not preset then error(err) end
     preset = merge_parameter_overrides(preset, def.overrides, effect, effect.random)
+    require_particle_texture(preset.texture, effect, emitter)
+    for _, frame_texture in ipairs(preset.frames or {}) do
+        require_particle_texture(frame_texture, effect, emitter)
+    end
     if effect.scale ~= 1 then
         if is_vec3(preset.size) then preset.size = vmul(preset.size, effect.scale) end
         if is_vec3(preset.spawn_spread) then preset.spawn_spread = vmul(preset.spawn_spread, effect.scale) end
@@ -2024,8 +2150,8 @@ spawn_entity_particle = function(emitter, effect)
     offset = vmul(offset, effect.scale)
     local transform = effect_transform(effect)
     local position = (effect.space ~= "world" and effect.anchor)
-        and point_in_transform(transform.anchor, offset, effect.inherit_scale)
-        or vadd(current_position(effect), offset)
+        and point_in_transform(transform, offset, effect.inherit_scale)
+        or vadd(transform.position, offset)
     local life = random_range(resolve(def.lifetime or 2.0, effect, effect.random), effect.random)
     local velocity = initial_velocity(resolve(def, effect, effect.random), effect.random, offset)
     local component_args = resolve(def.component_args or {}, effect, effect.random)
@@ -2440,7 +2566,7 @@ local function refresh_emitter(emitter, effect)
     if emitter.particles then
         local def = emitter.definition
         local spawn = resolve(def.spawn or {}, effect, effect.random)
-        if spawn.mode == "burst" then
+        if (spawn.mode or "burst") == "burst" then
             local wanted = math.max(0, math.floor(emitter.runtime_count or spawn.count or 0))
             while #emitter.particles > wanted do
                 local particle = table.remove(emitter.particles)
@@ -2506,7 +2632,13 @@ local function refresh_emitter(emitter, effect)
         local capacity = math.max(1, math.floor(settings.capacity or 512))
         local count = math.max(0, math.floor(settings.count or 128))
         local batches = math.max(1, math.ceil(count / capacity))
-        if batches ~= #emitter.containers then
+        local previous_count = emitter.controller_count or count
+        local replaced = batches ~= #emitter.containers or capacity ~= emitter.controller_capacity
+        if replaced then
+            emitter.controller_ages = {}
+            emitter.controller_lifetimes = {}
+            emitter.pose_history = {}
+            emitter.container_bounds = {}
             for _, uid in ipairs(emitter.containers) do if entities.exists(uid) then entities.despawn(uid) end end
             emitter.containers = {}
             local remaining = count
@@ -2516,10 +2648,31 @@ local function refresh_emitter(emitter, effect)
                 remaining = remaining - batch
             end
         else
+            if count ~= previous_count and emitter.pose_history then
+                for particle_index = math.min(count, previous_count) + 1,
+                    math.max(count, previous_count) do
+                    local container_index = math.floor((particle_index - 1) / capacity) + 1
+                    local history = emitter.pose_history[container_index]
+                    if history then
+                        history[(particle_index - 1) % capacity + 1] = nil
+                    end
+                end
+            end
+            if count > previous_count and emitter.controller_ages then
+                for index = previous_count + 1, count do
+                    emitter.controller_ages[index] = nil
+                    if emitter.controller_lifetimes then emitter.controller_lifetimes[index] = nil end
+                end
+            end
             for index, uid in ipairs(emitter.containers) do
                 local entity = entities.exists(uid) and entities.get(uid)
                 local component = entity and entity:get_component("wisplib:mesh_emitter")
-                if entity then safe_call(entity.transform, "set_size", {effect.scale, effect.scale, effect.scale}) end
+                if entity then
+                    if emitter.motion ~= "controlled" and emitter.motion ~= "hybrid" then
+                        safe_call(entity.transform, "set_size",
+                            {effect.scale, effect.scale, effect.scale})
+                    end
+                end
                 if component and component.set_settings then
                     local batch = math.max(0, math.min(capacity, count - (index - 1) * capacity))
                     local per_container = clone(settings)
@@ -2528,6 +2681,8 @@ local function refresh_emitter(emitter, effect)
                 end
             end
         end
+        emitter.controller_count = count
+        emitter.controller_capacity = capacity
     end
 end
 
@@ -3339,13 +3494,72 @@ local function json_safe(value, seen, label)
     return true
 end
 
-local function storage_path()
+local function storage_path(filename)
     if not world.is_open() then return nil, "world is not open" end
     -- VoxelCore's pack storage helper creates world:data/wisplib and keeps
     -- these records with the world when it is copied or rewritten.
-    local ok, path = pcall(pack.data_file, "wisplib", "world_effects.json")
+    local ok, path = pcall(pack.data_file, "wisplib", filename or "world_effects.json")
     if not ok then return nil, "cannot access world pack storage: " .. tostring(path) end
     return path
+end
+
+-- Adler-32 detects incomplete or changed slot contents; it is not a security signature.
+local function world_storage_checksum(content)
+    local a, b = 1, 0
+    for index = 1, #content do
+        a = (a + content:byte(index)) % 65521
+        b = (b + a) % 65521
+    end
+    return string.format("%08x", b * 65536 + a)
+end
+
+local world_storage_slots = {"world_effects.a.json", "world_effects.b.json"}
+
+local function valid_world_storage_document(document)
+    if type(document) ~= "table" or document.schema ~= 1
+        or type(document.effects) ~= "table" then return false end
+    local count = 0
+    for key in pairs(document.effects) do
+        if type(key) ~= "number" or key < 1 or key % 1 ~= 0 then return false end
+        count = count + 1
+    end
+    return count == #document.effects
+end
+
+local function read_world_storage_slot(index)
+    local path, path_error = storage_path(world_storage_slots[index])
+    if not path then return nil, path_error end
+    if not file.exists(path) then return nil end
+    local ok, wrapper = pcall(function() return json.parse(file.read(path)) end)
+    if not ok or type(wrapper) ~= "table" or wrapper.schema ~= 2
+        or type(wrapper.payload) ~= "string" or type(wrapper.checksum) ~= "string"
+        or not finite_number(wrapper.generation) or wrapper.generation < 1
+        or wrapper.generation % 1 ~= 0
+        or wrapper.checksum ~= world_storage_checksum(wrapper.payload) then
+        return nil, "saved VFX slot " .. index .. " is incomplete or has an invalid checksum"
+    end
+    local parsed, document = pcall(json.parse, wrapper.payload)
+    if not parsed or not valid_world_storage_document(document) then
+        return nil, "saved VFX slot " .. index .. " contains an invalid schema or effects array"
+    end
+    return {document = document, generation = wrapper.generation,
+        payload = wrapper.payload, path = path}
+end
+
+local function latest_world_storage_slot()
+    local best, best_index, errors, present = nil, nil, {}, false
+    for index = 1, #world_storage_slots do
+        local path, path_error = storage_path(world_storage_slots[index])
+        if not path then return nil, nil, path_error end
+        if file.exists(path) then present = true end
+        local slot, slot_error = read_world_storage_slot(index)
+        if slot_error then errors[#errors + 1] = slot_error end
+        if slot and (not best or slot.generation > best.generation) then
+            best, best_index = slot, index
+        end
+    end
+    if present and not best then return nil, nil, table.concat(errors, "; ") end
+    return best, best_index
 end
 
 local function needs_particle_frontend(definition)
@@ -3592,8 +3806,8 @@ function WorldAPI.duplicate(id, overrides)
     return WorldAPI.create(record.effect_id, record)
 end
 function WorldAPI.save()
-    local path, storage_error = storage_path()
-    if not path then return false, storage_error end
+    local latest, latest_index, storage_error = latest_world_storage_slot()
+    if storage_error then return false, storage_error end
     if world_load_error then
         return false, "refusing to overwrite a WorldEffect file that failed to load: " .. world_load_error
     end
@@ -3610,25 +3824,68 @@ function WorldAPI.save()
     local document = {schema = 1, next_id = world_next_id, effects = list}
     local ok, content = pcall(json.tostring, document, true)
     if not ok then return false, "cannot encode world effects: " .. tostring(content) end
+    local target_index = latest_index == 1 and 2 or 1
+    local path, path_error = storage_path(world_storage_slots[target_index])
+    if not path then return false, path_error end
+    local wrapper = {schema = 2, generation = latest and latest.generation + 1 or 1,
+        checksum = world_storage_checksum(content), payload = content}
+    local encoded, bytes = pcall(json.tostring, wrapper, true)
+    if not encoded then return false, "cannot encode world effects slot: " .. tostring(bytes) end
     if not file.isdir("world:data/wisplib") then
         return false, "cannot create world:data/wisplib storage folder"
     end
     local wrote, write_result = pcall(function()
-        return file.write_bytes(path, Bytearray(content))
+        return file.write_bytes(path, Bytearray(bytes))
     end)
     if not wrote or write_result ~= true then
         return false, "cannot write world effects: " .. tostring(wrote and "storage device reported a failed write" or write_result)
     end
+    local verified, verify_error = read_world_storage_slot(target_index)
+    if not verified or verified.payload ~= content
+        or verified.generation ~= wrapper.generation then
+        return false, "world effects write could not be verified: " .. tostring(verify_error)
+    end
+    -- After a verified migration, remove the old single-file copy so that a
+    -- future missing pair of slots cannot silently resurrect stale records.
+    local legacy_path = storage_path()
+    if legacy_path and file.exists(legacy_path) then
+        local removed, remove_result = pcall(file.remove, legacy_path)
+        if not removed or remove_result ~= true then
+            return false, "world effects slot was saved, but legacy file cleanup failed"
+        end
+    end
     return true
 end
 function WorldAPI.load()
+    local latest, _, slot_error = latest_world_storage_slot()
+    if slot_error then
+        world_load_error = slot_error
+        return false, slot_error
+    end
     local path, storage_error = storage_path()
     if not path then return false, storage_error end
     local candidate, candidate_next, errors = {}, 1, {}
-    if file.exists(path) then
-        local ok, loaded = pcall(function() return json.parse(file.read(path)) end)
+    if latest or file.exists(path) then
+        local ok, loaded
+        if latest then
+            ok, loaded = true, latest.document
+        else
+            ok, loaded = pcall(function() return json.parse(file.read(path)) end)
+        end
         if not ok or type(loaded) ~= "table" or loaded.schema ~= 1 or type(loaded.effects) ~= "table" then
             world_load_error = "saved VFX file is invalid or uses an unsupported schema"
+            return false, world_load_error
+        end
+        local entry_count = 0
+        for key in pairs(loaded.effects) do
+            if type(key) ~= "number" or key < 1 or key % 1 ~= 0 then
+                world_load_error = "saved VFX effects must be a dense array"
+                return false, world_load_error
+            end
+            entry_count = entry_count + 1
+        end
+        if entry_count ~= #loaded.effects then
+            world_load_error = "saved VFX effects must be a dense array"
             return false, world_load_error
         end
         local saved_next = tonumber(loaded.next_id)
@@ -3674,6 +3931,14 @@ function WorldAPI.load()
                 errors[#errors + 1] = "record " .. tostring(index) .. " skipped: " .. tostring(validation_error)
             end
         end
+    end
+
+    -- Missing definitions and invalid records must not disappear on the next
+    -- automatic world save. Keep the current runtime set until the file can
+    -- be loaded intact or the caller explicitly clears it.
+    if #errors > 0 then
+        world_load_error = "saved VFX file contains invalid records: " .. table.concat(errors, "; ")
+        return false, world_load_error
     end
 
     -- Commit only after parsing and structural validation. A malformed file

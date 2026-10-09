@@ -1,11 +1,5 @@
-# VoxelCore generates content.json; do not commit generated pack indexes.
+# Put local-only drafts, logs, and test artifacts in this directory.
+/.local/
+
+# VoxelCore generates this index in the content pack's required location.
 content/**/content.json
-
-# Local worlds, settings, backups and runtime output.
-/userfiles/
-*.log
-/crash_reports/
-/cache/
-
-# Local project customization.
-/project_client.lua
