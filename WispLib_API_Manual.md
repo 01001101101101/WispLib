@@ -2,7 +2,7 @@
 
 WispLib читает описание эффекта из JSON и возвращает Lua handle для управления его экземпляром. Один эффект может состоять из нескольких emitters и звуков. Публичная точка входа — `require "wisplib:vfx"`.
 
-В этой редакции описан пакет **0.3.4**: Lua API **0.2.0**, формат definitions **schema 1**, целевая версия VoxelCore — **0.32**. Версия пакета, версия Lua API и номер схемы независимы.
+Это руководство относится к WispLib 0.4.0 для VoxelCore 0.32. В версии 0.4.0 добавлен `vfx.screen` для управления экранными GLSL-постэффектами; обычные particle definitions продолжают использовать схему 1.
 
 ## Минимальный пример API
 
@@ -17,7 +17,7 @@ WispLib читает описание эффекта из JSON и возвращ
   "version": "0.1.0",
   "creator": "Your Name",
   "description": "My WispLib effects",
-  "dependencies": ["!base@>=0.32", "!wisplib@>=0.3.4"]
+  "dependencies": ["!base@>=0.32", "!wisplib@>=0.4.0"]
 }
 ```
 
@@ -74,6 +74,172 @@ end
 ### Кто вызывает `update()`
 
 При обычном подключении WispLib его `scripts/hud.lua` вызывает `vfx.update()` каждый клиентский render frame, а `scripts/world.lua` делает это на headless/server world tick. Не вызывайте `update()` второй раз из игрового pack: эффект продвинется повторно. Если lifecycle-скрипты библиотеки отключены, обеспечьте один регулярный вызов сами. `vfx.update(dt)` принимает необязательный интервал в секундах и ограничивает его максимумом `0.1`.
+
+## Экранные GLSL post-effects
+
+`vfx.screen` — отдельный API поверх `gfx.posteffects` движка. Он не заменяет `billboard`, `mesh` или `entity`: GLSL post-effect получает кадр сцены и возвращает преобразованный кадр. Используйте его для цветокоррекции, тепловизора, помех, экранных волн, процедурных порталов и других эффектов постобработки. В игровом pack используйте публичный путь `local vfx = require "wisplib:vfx"; vfx.screen...`; `wisplib:screenfx` — внутренний модуль, на котором построен этот фасад.
+
+Полный пример с файлами pack, GLSL и Lua-реакцией на движение игрока есть в [руководстве разработчика](WispLib_Руководство_разработчика.md#экранный-эффект-радиопомехи-реагирующие-на-движение). Здесь описаны формат и поведение API.
+
+### Что добавить в свой content pack
+
+Объявите слот в корневом `resources.json`, включите GLSL asset в `preload.json`, добавьте shader и описание WispLib-профиля. Пример профиля `content/mygame/screen-effects/thermal.screenfx.json`:
+
+```json
+{
+  "schema": 1,
+  "slot": "mygame:thermal",
+  "effect": "mygame_thermal",
+  "intensity": 1.0,
+  "parameters": {
+    "strength": {
+      "uniform": "p_strength",
+      "type": "float",
+      "default": 0.7,
+      "min": 0.0,
+      "max": 1.0
+    }
+  }
+}
+```
+
+`resources.json`:
+
+```json
+{"post-effect-slot": ["thermal"]}
+```
+
+`preload.json`:
+
+```json
+{"post-effects": ["mygame_thermal"]}
+```
+
+Слот получает Content ID `mygame:thermal`. У GLSL-эффекта другое имя: это обычный alias из `preload.json`, здесь `mygame_thermal`, без префикса `mygame:`. Движок ищет shader по этому alias в `shaders/effects/mygame_thermal.glsl`; выбирайте уникальные alias, поскольку asset registry движка не использует namespace пака. Для эффекта, которому нужны G-buffer textures, укажите `{"name":"mygame_thermal", "advanced":true}` в `post-effects`; такой эффект не запускается при classic rendering.
+
+Минимальный файл `content/mygame/shaders/effects/mygame_thermal.glsl`:
+
+```glsl
+#param float p_strength = 0.7
+
+vec4 effect() {
+    vec4 source = texture(u_screen, v_uv);
+    float luminance = dot(source.rgb, vec3(0.299, 0.587, 0.114));
+    vec3 heat = vec3(luminance, luminance * 0.55, 0.08);
+    return vec4(mix(source.rgb, heat, p_strength * u_intensity), source.a);
+}
+```
+
+Это шейдерный фильтр всего кадра. `p_strength` — настраиваемый параметр, `u_intensity` задаётся движком из `gfx.posteffects`; GLSL-файл обязан сам объявить нужные `#param` и соответствующие uniform’ы. WispLib проверяет значения по профилю, но не может прочитать GLSL и обнаружить несовпадение имени `uniform` — движок молча игнорирует неизвестное имя.
+
+### Запуск и управление
+
+Типичный вызов выполняется из клиентского Lua-кода после открытия HUD:
+
+```lua
+local vfx = require "wisplib:vfx"
+
+local thermal, err = vfx.screen.play("mygame:thermal", {
+    parameters = {strength = 0.8},
+    fade_in = 0.35,
+})
+if not thermal then
+    print("Не удалось включить фильтр: " .. tostring(err))
+    return
+end
+
+thermal:tween("strength", 0.35, 1.2, "smooth")
+thermal:fade_to(0.65, 0.4)
+thermal:stop(0.5) -- плавно свести интенсивность к нулю; handle сохраняется
+thermal:resume(0.3)
+thermal:destroy() -- освободить слот в WispLib
+```
+
+Профиль загружается по ID из `screen-effects/<имя>.screenfx.json`; его можно также зарегистрировать Lua-таблицей через `vfx.screen.register(id, definition)`. Функции модуля относятся ко всем профилям или handles:
+
+| Вызов | Назначение |
+|---|---|
+| `play(id, options)` | Загружает профиль и создаёт handle для экранного эффекта. |
+| `validate(id, definition?)` | Проверяет профиль, не запуская его. |
+| `get_definition(id)` / `list()` | Читает профиль / список известных профилей. |
+| `get(handle_id)` / `stats()` | Находит handle / возвращает счётчики экранного API. |
+| `register(id, definition)` | Регистрирует профиль Lua-таблицей вместо JSON. |
+| `stop_all()` | Останавливает и уничтожает handles WispLib. |
+| `clear_definition_cache()` | Сбрасывает кэш загруженных JSON-профилей. |
+| `pack_array(id, name, values)` | Проверяет и упаковывает таблицу данных для uniform-массива. |
+| `last_error()` / `clear_error()` | Читает / очищает ошибку автоматического обновления. |
+
+Handle управляет одним запущенным экземпляром:
+
+| Метод handle | Назначение |
+|---|---|
+| `set(name, value)` / `set_params(table)` / `get(name)` | Меняет или читает один параметр / таблицу параметров. |
+| `tween(name, value, seconds, easing)` | Плавно меняет параметр. |
+| `set_array(name, values)` | Загружает новые данные uniform-массива. |
+| `set_intensity(value)` / `fade_to(value, seconds)` | Меняет общую интенсивность сразу / плавно. |
+| `stop(seconds?)` / `resume(seconds?)` | Гасит эффект / снова включает его, при необходимости через переход. |
+| `restart(options?)` | Повторно запускает handle с исходными или новыми настройками. |
+| `status()` / `exists()` / `is_active()` | Возвращает состояние / проверяет handle / проверяет активность слота в движке. |
+| `observed_intensity()` / `last_error()` | Читает интенсивность слота / последнюю ошибку native-вызова. |
+| `destroy()` | Удаляет handle WispLib и освобождает принадлежащий ему слот. |
+
+Для массива `get(name)` возвращает переданные packed bytes. `stop()` с затуханием оставляет handle доступным для `resume()`; `destroy()` освобождает его.
+
+Типы обычных параметров: `float`/`number`, `int`, `vec2`, `vec3`, `vec4` и `color`. `color` — alias для GLSL `vec4`; передавайте `{r, g, b, a}`. Профиль задаёт GLSL-имя, тип, значение `default` и необязательные числовые пределы `min`/`max`. Значение по умолчанию обязательно и применяется при запуске и `restart()`.
+
+Uniform-массиву нужно указать `element_type` и положительную целую `capacity`. Для каждого массива передайте начальные данные в `play({arrays=...})`; эффект не включится с неинициализированным массивом. Данные можно задать таблицей Lua, `Bytearray`, таблицей байтов или packed byte string. Таблица Lua для `vecN` — это список векторов, например `{{0, 1, 0}, {1, 0, 0}}`; недостающие элементы и компоненты дополняются нулями до `capacity`. `vfx.screen.pack_array(id, name, values)` проверяет таблицу и возвращает packed byte string. Число элементов всё равно нужно отдельно передать шейдеру обычным параметром, если он должен отличать заполненные позиции от нулевых.
+
+Пример профиля и запуска массива:
+
+```json
+{
+  "schema": 1,
+  "slot": "mygame:points",
+  "effect": "mygame_points",
+  "parameters": {
+    "point_count": {"uniform": "p_pointCount", "type": "int", "default": 0, "min": 0, "max": 64},
+    "points": {
+      "uniform": "p_points",
+      "type": "array",
+      "element_type": "vec3",
+      "capacity": 64
+    }
+  }
+}
+```
+
+Шейдер для этого профиля должен объявить соответствующие параметры, например:
+
+```glsl
+#param int p_pointCount = 0
+#param vec3 p_points[64]
+```
+
+```lua
+local vfx = require "wisplib:vfx"
+local points = {{0, 1, 0}, {1, 0, 0}, {0, -1, 0}}
+local fx, err = vfx.screen.play("mygame:points", {
+    parameters = {point_count = #points},
+    arrays = {points = points},
+})
+```
+
+`restart({arrays=...})` заменяет массивы перед повторным запуском; без этого аргумента handle повторно отправляет последние массивы. `set_array()` также сохраняет снимок переданных данных, поэтому последующие изменения исходной таблицы или `Bytearray` не меняют значение handle. `handle:last_error()` сообщает последнюю ошибку вызова движка для этого эффекта, а `vfx.screen.last_error()` — непредвиденную ошибку автоматического обновления.
+
+WispLib проверяет указанную в профиле `capacity` и точный размер передаваемого буфера. Он не читает GLSL, поэтому не может подтвердить, что имя uniform, тип и объявленный в shader размер совпадают с профилем. Нативный API VoxelCore молча игнорирует неизвестное имя и не проверяет размер uniform-массива. Поэтому профиль и GLSL нужно согласовать вручную. Упакованные числа используют системный порядок байтов; массивы должны соответствовать формату, ожидаемому GLSL и сборкой движка.
+
+Уровень активности совпадает с native-порогом движка: значения интенсивности не выше `1e-4` не рисуются. Поэтому `fade_in` с такой целевой интенсивностью отклоняется; fade к неактивному значению завершается состоянием `stopped`. `handle:is_active()` и `observed_intensity()` читают фактическое состояние слота из движка; если другой скрипт напрямую меняет тот же слот через `gfx.posteffects`, это наблюдение может не совпадать с данными handle.
+
+`vfx.update()` сам продвигает переходы; дополнительный update из игрового пака не нужен. API доступен только на клиенте после открытия HUD. Для параллельных независимых post-effects каждому нужен собственный слот; один слот может принадлежать только одному WispLib handle. Активные handles также должны использовать разные alias из `preload.json`: VoxelCore возвращает общий `PostEffect` object для одного alias, а его параметры и intensity изменяемые. Если нужны два независимых экземпляра одного GLSL, объявите два alias (при необходимости направьте оба на один файл через поле `path`) и назначьте каждому отдельный слот. `replace = true` явно разрешает забрать слот, занятый другим WispLib handle. Вызовы `gfx.posteffects` напрямую обходят учёт WispLib: не смешивайте два API на одном слоте, иначе внешний код может заменить шейдер или его интенсивность без уведомления handle.
+
+### Пределы post-processing
+
+- Каждый активный слот добавляет полноэкранный проход; число тяжёлых эффектов следует ограничивать и измерять на целевых GPU.
+- В `preload.json` свойство `advanced: true` требует advanced renderer. Такой эффект пропускается движком, если G-buffer не создан.
+- Порядок проходов задаёт порядок post-effect slots в движке; WispLib не может переставить слот в цепочке.
+- Движок предоставляет экран, камеру и фиксированные G-buffer inputs, но не открывает Lua API для своих framebuffer’ов, VBO/instancing или геометрии GLSL.
+- Post-processing рисуется после мира, перед first-person руками и HUD. Он не создаёт физические объекты, не отбрасывает тени и сам по себе не становится 3D-моделью.
+- Профиль и shader asset должны быть загружены content pack’ом. Профиль не создаёт слот и не компилирует GLSL на лету.
 
 ## Выбрать backend и описать emitter
 
@@ -324,10 +490,10 @@ if not ok then print(save_error) end
 | `vfx.get_definition(id)` | Копия definition либо `nil, error` |
 | `vfx.list_definitions({search = ..., placeable_only = ...})` | Список установленных definitions и отдельный список ошибок чтения |
 | `vfx.clear_definition_cache(id?)` | Сбрасывает одну или все загруженные definitions |
-| `vfx.capabilities()` | Таблица возможностей backend |
-| `vfx.stats()` / `vfx.handles()` | Счётчики runtime / handles в памяти |
+| `vfx.capabilities()` | Таблица возможностей screen post-effects, particle backends и audio |
+| `vfx.stats()` / `vfx.handles()` | Счётчики runtime / handles в памяти, включая активные screen effects |
 | `vfx.stop_all()` / `vfx.stop_transient_all()` | Уничтожает все instances / только instances вне WorldEffects |
 
-`vfx.stats()` считает объекты и raycasts текущего update; это не профилировщик CPU/GPU. Billboard не даёт WispLib точного числа ещё видимых частиц: после остановки библиотека ждёт максимальный `lifetime` preset. Mesh slots обновляются через Lua и skeleton API без GPU simulation. Стоимость Entity backend растёт с числом отдельных Entity. Библиотека не задаёт универсальный безопасный бюджет частиц.
+`vfx.stats()` считает runtime объекты, raycasts и screen handles; это не профилировщик CPU/GPU. Billboard не даёт WispLib точного числа ещё видимых частиц: после остановки библиотека ждёт максимальный `lifetime` preset. Mesh slots обновляются через Lua и skeleton API без GPU simulation. Стоимость Entity backend растёт с числом отдельных Entity. Каждый активный screen slot добавляет полноэкранный проход; WispLib не выставляет универсальный безопасный бюджет.
 
 Исходный публичный модуль: `content/wisplib/modules/vfx.lua`. Компонент mesh backend: `content/wisplib/scripts/components/mesh_emitter.lua`.

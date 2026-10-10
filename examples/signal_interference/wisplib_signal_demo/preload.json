@@ -1,0 +1,8 @@
+{
+  "post-effects": [
+    {
+      "name": "wisplib_signal_demo_radio",
+      "path": "shaders/effects/radio_interference"
+    }
+  ]
+}

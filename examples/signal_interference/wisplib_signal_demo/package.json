@@ -1,0 +1,10 @@
+{
+  "id": "wisplib_signal_demo",
+  "title": "WispLib Signal Demo",
+  "version": "1.0.0",
+  "description": "Короткий пример GLSL-помех с управлением через WispLib.",
+  "dependencies": [
+    "!base@>=0.32",
+    "!wisplib@>=0.4.0"
+  ]
+}

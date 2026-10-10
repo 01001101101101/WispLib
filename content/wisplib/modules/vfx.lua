@@ -1,6 +1,7 @@
 -- Public VFX API. Definitions are loaded from <pack>:effects/<name>.effect.json.
 -- Backends intentionally stay inside this module so consumers only own handles.
-local API = {API_VERSION = "0.2.0", SCHEMA_VERSION = 1}
+local API = {API_VERSION = "0.3.0", SCHEMA_VERSION = 1}
+local screenfx = require "wisplib:screenfx"
 
 local definitions = {}
 local instances = {}
@@ -2846,6 +2847,8 @@ function API.update(delta_override)
         and math.max(0, math.min(0.1, delta_override))
         or math.max(0, math.min(0.1, measured_delta))
     last_update = now
+    local screen_ok, screen_error = pcall(screenfx._update, delta)
+    if not screen_ok then screenfx._record_update_error(screen_error) end
     raycasts_this_update = 0
     local finished = {}
     for _, effect in pairs(instances) do
@@ -3375,6 +3378,23 @@ end
 
 function API.capabilities()
     return {
+        screen = {
+            post_processing = true,
+            client_only = true,
+            shader_assets = true,
+            inputs = {"u_screen", "u_skybox", "u_timer", "u_screenSize",
+                "u_projection", "u_view", "u_inverseView", "u_cameraPos"},
+            advanced_inputs = {"u_position", "u_normal", "u_emission", "u_noise", "u_ssao"},
+            parameters = {"float", "number", "int", "vec2", "vec3", "vec4", "color", "array"},
+            array_input = "typed table or packed bytes, checked against declared capacity",
+            arrays_required_before_play = true,
+            transitions = {"intensity", "float", "vec2", "vec3", "vec4", "color"},
+            compute_shader = false,
+            custom_texture_binding = false,
+            custom_vertex_shader = false,
+            custom_framebuffer = false,
+            world_geometry = false,
+        },
         billboard = {position = true, native_preset = true, controlled_transform = false,
             color = false, scale = false, collision = {"none"},
             pause_semantics = "emission_only"},
@@ -3401,6 +3421,7 @@ function API.stop_all()
         handles[#handles + 1] = {id = id, generation = effect.generation}
     end
     for _, handle in ipairs(handles) do API.destroy(handle) end
+    screenfx.stop_all()
 end
 
 function API.stop_transient_all()
@@ -3415,12 +3436,18 @@ function API.stop_transient_all()
         if not persistent[key] then handles[#handles + 1] = {id = id, generation = effect.generation} end
     end
     for _, handle in ipairs(handles) do API.destroy(handle) end
+    screenfx.stop_all()
 end
 
 function API.stats()
+    local screen_stats = screenfx.stats()
     local result = {effects = 0, world_effects = 0, billboards = 0, mesh_particles = 0,
         entities = 0, controlled_particles = 0, simulated_particles = 0,
-        audio_speakers = 0, raycasts = raycasts_this_update}
+        audio_speakers = 0, raycasts = raycasts_this_update,
+        screen_effects = screen_stats.active, screen_effect_handles = screen_stats.handles,
+        screen_effect_engine_active = screen_stats.engine_active,
+        screen_effect_errors = screen_stats.errors,
+        screen_effect_last_update_error = screen_stats.last_update_error}
     for _, effect in pairs(instances) do
         if effect.state ~= "finished" then result.effects = result.effects + 1 end
         for _, entry in ipairs(effect.audio_speakers or {}) do
@@ -4283,5 +4310,7 @@ function Handle:emit(event, details) return API.emit(self, event, details) end
 function Handle:pause() return API.pause(self) end
 function Handle:resume() return API.resume(self) end
 function Handle:restart() return API.restart(self) end
+
+API.screen = screenfx
 
 return API
