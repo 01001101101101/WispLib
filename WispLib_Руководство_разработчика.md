@@ -94,13 +94,13 @@ local ring
 
 function on_hud_open()
     local player_id = hud.get_player()
-    local pos = player.get_pos(player_id)
+    local x, y, z = player.get_pos(player_id)
     local dir = player.get_dir(player_id)
 
     local center = {
-        pos[1] + dir[1] * 3,
-        pos[2] + 1.4 + dir[2] * 3,
-        pos[3] + dir[3] * 3
+        x + dir[1] * 3,
+        y + 1.4 + dir[2] * 3,
+        z + dir[3] * 3
     }
 
     local err
